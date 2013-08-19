@@ -2,13 +2,13 @@ class beuser(
   $ensure = 'present',
   $srcdir = '/opt/eis_di_share/apps/beuser',
   $dstdir = '/bin',
-  $name   = 'beuser',
+  $binname   = 'beuser',
   $mode   = '0755',
   $owner  = 'root',
   $group  = 'root',
 ) {
 
-  case $::architecture {
+  case $::hardwareisa {
     /amd64|sparc/ : { $bitdir = 'x64'  }
     /i386/        : { $bitdir = 'i386' }
     default       : { fail( "Unsupported architecture: ${::architecture}" ) }
@@ -17,8 +17,15 @@ class beuser(
   case $::operatingsystem {
     'Solaris' : {
       case $::operatingsystemrelease {
-        '5.10' : {
-          if $::architecture == 'sparc' {
+        /^10/ : {
+          if $::hardwareisa == 'sparc' {
+            $suffix = 'sol10sparc'
+          } else {
+            $suffix = 'sol10x64'
+          }
+        }
+        /^9/ : {
+          if $::hardwareisa == 'sparc' {
             $suffix = 'sol10sparc'
           } else {
             $suffix = 'sol10x64'
@@ -29,7 +36,7 @@ class beuser(
         }
       }
     }
-    /sle[ds]/i : {
+    /(?i:sle[ds])/ : {
       case $::operatingsystemrelease {
         /^10/ : {
           if $::architecture == 'x64' {
@@ -50,7 +57,7 @@ class beuser(
         }
       }
     }
-    /^RHE/ : {
+    /(?i:^RHE)/ : {
       case $::operatingsystemrelease {
         /^5/ : { $suffix = 'rhl5' }
         /^6/ : { $suffix = 'rhl6' }
@@ -66,8 +73,8 @@ class beuser(
 
   file { 'beuser' :
     ensure => $ensure,
-    path => "${dstdir}/${name}",
-    source => "$srcdir}/${bitdir}/${name}.${suffix}",
+    path => "${dstdir}/${binname}",
+    source => "$srcdir}/${bitdir}/${binname}.${suffix}",
     mode   => $mode,
     owner  => $owner,
     group  => $group,
