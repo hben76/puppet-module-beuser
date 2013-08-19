@@ -74,7 +74,7 @@ class beuser(
   file { 'beuser' :
     ensure => $ensure,
     path => "${dstdir}/${binname}",
-    source => "$srcdir}/${bitdir}/${binname}.${suffix}",
+    source => "${srcdir}/${bitdir}/${binname}.${suffix}",
     mode   => $mode,
     owner  => $owner,
     group  => $group,
