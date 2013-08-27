@@ -1,11 +1,11 @@
 class beuser(
-  $ensure = 'present',
-  $srcdir = '/opt/eis_di_share/apps/beuser',
-  $dstdir = '/bin',
-  $binname   = 'beuser',
-  $mode   = '0755',
-  $owner  = 'root',
-  $group  = 'root',
+  $ensure  = 'present',
+  $srcdir  = '/opt/eis_cm/eis_cm_repo/beuser',
+  $dstdir  = '/bin',
+  $binname = 'beuser',
+  $mode    = '0755',
+  $owner   = 'root',
+  $group   = 'root',
 ) {
 
   case $::hardwareisa {
@@ -16,15 +16,16 @@ class beuser(
 
   case $::operatingsystem {
     'Solaris' : {
+      $sdir = "${srcdir}/x64"
       case $::operatingsystemrelease {
-        /^10/ : {
+        /^5.1[01]/ : {
           if $::hardwareisa == 'sparc' {
             $suffix = 'sol10sparc'
           } else {
             $suffix = 'sol10x64'
           }
         }
-        /^9/ : {
+        /^5.9/ : {
           if $::hardwareisa == 'sparc' {
             $suffix = 'sol10sparc'
           } else {
@@ -37,6 +38,7 @@ class beuser(
       }
     }
     /(?i:sle[ds])/ : {
+      $sdir = "${srcdir}/${bitdir}"
       case $::operatingsystemrelease {
         /^10/ : {
           if $::architecture == 'x64' {
@@ -58,6 +60,7 @@ class beuser(
       }
     }
     /(?i:^RHE)/ : {
+      $sdir = "${srcdir}/${bitdir}"
       case $::operatingsystemrelease {
         /^5/ : { $suffix = 'rhl5' }
         /^6/ : { $suffix = 'rhl6' }
@@ -74,7 +77,7 @@ class beuser(
   file { 'beuser' :
     ensure => $ensure,
     path => "${dstdir}/${binname}",
-    source => "${srcdir}/${bitdir}/${binname}.${suffix}",
+    source => "${sdir}/${binname}.${suffix}",
     mode   => $mode,
     owner  => $owner,
     group  => $group,
