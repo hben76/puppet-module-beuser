@@ -1,6 +1,6 @@
 class beuser(
   $ensure  = 'present',
-  $srcdir  = '/opt/eis_cm/eis_cm_repo/beuser',
+  $srcdir  = '/opt/eis_cm_repos/eis_cm_repo/beuser',
   $dstdir  = '/bin',
   $binname = 'beuser',
   $mode    = '0755',
@@ -8,17 +8,10 @@ class beuser(
   $group   = 'root',
 ) {
 
-  case $::hardwareisa {
-    /amd64|sparc/ : { $bitdir = 'x64'  }
-    /i386/        : { $bitdir = 'i386' }
-    default       : { fail( "Unsupported architecture: ${::architecture}" ) }
-  }
-
   case $::operatingsystem {
     'Solaris' : {
-      $sdir = "${srcdir}/x64"
       case $::operatingsystemrelease {
-        /^5.1[01]/ : {
+        /(^5.1[01])|(^10)/ : {
           if $::hardwareisa == 'sparc' {
             $suffix = 'sol10sparc'
           } else {
@@ -33,54 +26,77 @@ class beuser(
           }
         }
         default : {
-          fail( "Solaris ${::operatingsystemrelease} is not supported" ) 
+          warning( "Solaris ${::operatingsystemrelease} is not supported by module beuser" )
         }
       }
     }
     /(?i:sle[ds])/ : {
-      $sdir = "${srcdir}/${bitdir}"
       case $::operatingsystemrelease {
         /^10/ : {
-          if $::architecture == 'x64' {
+          if $::architecture == 'x86_64' {
             $suffix = 'sles10x64'
           } else {
             $suffix = 'sles10i386'
           }
         }
         /^11/ : {
-          if $::architecture == 'x64' {
+          if $::architecture == 'x86_64' {
             $suffix = 'sles11x64'
           } else {
             $suffix = 'sles11i386'
           }
         }
         default : {
-          fail( "${::operatingsystem} ${::operatingsystemrelease} is not supported" ) 
+          warning( "${::operatingsystem} ${::operatingsystemrelease} is not supported by module beuser" )
         }
       }
     }
-    /(?i:^RHE)/ : {
-      $sdir = "${srcdir}/${bitdir}"
+    /(?i:^RHE)|(?i:^RedH)/ : {
       case $::operatingsystemrelease {
-        /^5/ : { $suffix = 'rhl5' }
-        /^6/ : { $suffix = 'rhl6' }
+        /^5/ : {
+          if $::architecture == 'x86_64' {
+            $suffix = 'rhl5x64'
+          } else {
+            $suffix = 'rhl5i386'
+          }
+        }
+        /^6/ : {
+          if $::architecture == 'x86_64' {
+            $suffix = 'rhl6x64'
+          } else {
+            $suffix = 'rhl6i386'
+          }
+        }
         default : {
-          fail( "${::operatingsystem} ${::operatingsystemrelease} is not supported" ) 
+          warning( "${::operatingsystem} ${::operatingsystemrelease} is not supported by module beuser" )
+        }
+      }
+    }
+    /(?i:^Ubuntu)/ : {
+      case $::operatingsystemrelease {
+        /^12.04/ : {
+          if $::architecture == 'x86_64' {
+            $suffix = 'ubuntu1204x64'
+          } else {
+            warning( "${::operatingsystem} ${::operatingsystemrelease} with architecture ${::architecture} is not supported by module beuser" )
+          }
+        }
+        default : {
+          warning( "${::operatingsystem} ${::operatingsystemrelease} is not supported by module beuser" )
         }
       }
     }
     default : {
-      fail( "${::operatingsystem} ${::operatingsystemrelease} is not supported" ) 
+      warning( "${::operatingsystem} ${::operatingsystemrelease} is not supported by module beuser" )
     }
   }
 
   file { 'beuser' :
     ensure => $ensure,
     path => "${dstdir}/${binname}",
-    source => "${sdir}/${binname}.${suffix}",
+    source => "${srcdir}/${binname}.${suffix}",
     mode   => $mode,
     owner  => $owner,
     group  => $group,
   }
 }
-
