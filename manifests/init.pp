@@ -46,6 +46,13 @@ class beuser(
             $suffix = 'sles11i386'
           }
         }
+        /^9/ : {
+          if $::architecture == 'x86_64' {
+            $suffix = 'sles9x64'
+          } else {
+            $suffix = 'sles9i386'
+          }
+        }
         default : {
           warning( "${::operatingsystem} ${::operatingsystemrelease} is not supported by module beuser" )
         }
