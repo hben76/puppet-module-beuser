@@ -98,12 +98,14 @@ class beuser(
     }
   }
 
-  file { 'beuser' :
-    ensure => $ensure,
-    path => "${dstdir}/${binname}",
-    source => "${srcdir}/${binname}.${suffix}",
-    mode   => $mode,
-    owner  => $owner,
-    group  => $group,
+  if $suffix != undef {
+    file { 'beuser' :
+      ensure => $ensure,
+      path => "${dstdir}/${binname}",
+      source => "${srcdir}/${binname}.${suffix}",
+      mode   => $mode,
+      owner  => $owner,
+      group  => $group,
+    }
   }
 }
